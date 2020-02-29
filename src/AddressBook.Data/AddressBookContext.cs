@@ -1,5 +1,7 @@
 ﻿using AddressBook.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 
 namespace AddressBook.Data
 {
@@ -16,11 +18,11 @@ namespace AddressBook.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            //modelBuilder.ApplyConfiguration(new EquipmentConfiguration());
-            //modelBuilder.ApplyConfiguration(new EquipmentImageConfiguration());
-            //modelBuilder.ApplyConfiguration(new RoomConfiguration());
-            //modelBuilder.ApplyConfiguration(new UserSearchHistoryConfiguration());
-            //modelBuilder.ApplyConfiguration(new FloorConfiguration());
+            var assembly = AppDomain.CurrentDomain
+                                    .GetAssemblies()
+                                    .SingleOrDefault(x => x.GetName().Name == "AddressBook.Data");
+
+            modelBuilder.ApplyConfigurationsFromAssembly(assembly);
         }
     }
 }

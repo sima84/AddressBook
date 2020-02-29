@@ -14,9 +14,9 @@ namespace AddressBook.Data.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(nullable: true),
-                    BirthDate = table.Column<DateTime>(nullable: false),
-                    Address = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(maxLength: 100, nullable: false),
+                    BirthDate = table.Column<DateTime>(type: "date", nullable: true),
+                    Address = table.Column<string>(maxLength: 200, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -29,20 +29,25 @@ namespace AddressBook.Data.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Number = table.Column<string>(nullable: true),
-                    Type = table.Column<int>(nullable: false),
-                    ContactId = table.Column<long>(nullable: true)
+                    Number = table.Column<string>(maxLength: 20, nullable: false),
+                    ContactId = table.Column<long>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PhoneNumbers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PhoneNumbers_Contacts_ContactId",
+                        name: "FK_PhoneNumbers_Contacts",
                         column: x => x.ContactId,
                         principalTable: "Contacts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Contacts_NameAddress",
+                table: "Contacts",
+                columns: new[] { "Name", "Address" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PhoneNumbers_ContactId",

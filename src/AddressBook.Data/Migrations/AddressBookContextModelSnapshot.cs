@@ -27,15 +27,25 @@ namespace AddressBook.Data.Migrations
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Address")
-                        .HasColumnType("text");
+                        .HasColumnType("character varying(200)")
+                        .HasMaxLength(200)
+                        .IsUnicode(true);
 
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(100)
+                        .IsUnicode(true);
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("PK_Contacts");
+
+                    b.HasIndex("Name", "Address")
+                        .IsUnique()
+                        .HasName("IX_Contacts_NameAddress");
 
                     b.ToTable("Contacts");
                 });
@@ -47,16 +57,16 @@ namespace AddressBook.Data.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long?>("ContactId")
+                    b.Property<long>("ContactId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Number")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasColumnType("character varying(20)")
+                        .HasMaxLength(20);
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("PK_PhoneNumbers");
 
                     b.HasIndex("ContactId");
 
@@ -67,7 +77,10 @@ namespace AddressBook.Data.Migrations
                 {
                     b.HasOne("AddressBook.Data.Entities.Contact", "Contact")
                         .WithMany("PhoneNumbers")
-                        .HasForeignKey("ContactId");
+                        .HasForeignKey("ContactId")
+                        .HasConstraintName("FK_PhoneNumbers_Contacts")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
