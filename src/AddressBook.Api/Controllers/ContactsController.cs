@@ -1,9 +1,9 @@
-﻿using AddressBook.Api.Models.Contact.Request;
+﻿using AddressBook.Api.Models.Common.Response;
+using AddressBook.Api.Models.Contact.Request;
 using AddressBook.Api.Models.Contact.Response;
 using AddressBook.Business.Services.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using BusinessRequests = AddressBook.Business.Models.Contact.Request;
 
@@ -23,10 +23,11 @@ namespace AddressBook.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ContactOverviewResponseModel>>> GetContacts()
+        public async Task<ActionResult<PagedResponse<ContactOverviewResponseModel>>> GetContacts([FromQuery]ContactSearchRequestModel request)
         {
-            var contacts = await service.GetContactsAsync();
-            return Ok(mapper.Map<IEnumerable<ContactOverviewResponseModel>>(contacts));
+            var businessRequest = mapper.Map<BusinessRequests.ContactSearchRequestModel>(request);
+            var businessResponse = await service.GetContactsAsync(businessRequest);
+            return Ok(mapper.Map<PagedResponse<ContactOverviewResponseModel>>(businessResponse));
         }
 
         [HttpGet("{id}")]

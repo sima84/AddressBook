@@ -1,9 +1,11 @@
-﻿using AddressBook.Business.Models.Contact.Request;
+﻿using AddressBook.Business.Models.Common.Response;
+using AddressBook.Business.Models.Contact.Request;
 using AddressBook.Business.Models.Contact.Response;
 using AddressBook.Business.Models.PhoneNumber.Request;
 using AddressBook.Business.Services.Interfaces;
 using AddressBook.Data.Entities;
 using AddressBook.Data.Repository;
+using AddressBook.Data.Repository.Parameters;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -13,8 +15,18 @@ using System.Threading.Tasks;
 
 namespace AddressBook.Business.Services
 {
-    public class ContactService : IContactService
+    public class ContactService : BaseBusinessService, IContactService
     {
+        /// <summary>
+        /// Fields that are allowed for sorting in contacts overview
+        /// </summary>
+        private readonly List<string> allowedSortBy = new List<string> {
+            nameof(Contact.Id).ToLower(),
+            nameof(Contact.Name).ToLower(),
+            nameof(Contact.BirthDate).ToLower(),
+            nameof(Contact.Address).ToLower()
+        };
+
         private readonly IRepository<Contact> contactRepository;
         private readonly IRepository<PhoneNumber> phoneNumberRepository;
         private readonly IMapper mapper;
@@ -26,10 +38,33 @@ namespace AddressBook.Business.Services
             this.mapper = mapper;
         }
 
-        public async Task<IEnumerable<ContactOverviewResponseModel>> GetContactsAsync()
+        public async Task<PagedResponse<ContactOverviewResponseModel>> GetContactsAsync(ContactSearchRequestModel requestModel)
         {
-            var contacts = await contactRepository.GetAllAsync();
-            return mapper.Map<IEnumerable<ContactOverviewResponseModel>>(contacts);
+            var sortingParameters = PrepareSortParameters(requestModel, allowedSortBy);
+            var pagingParameters = PreparePagingParameters(requestModel);
+            var textSearchParameters = PrepareTextSearchParameters(requestModel);
+
+            var contacts = await contactRepository.GetAsync
+                (
+                    orderingParameters: sortingParameters,
+                    pagingParameters: pagingParameters,
+                    textSearchParameters: textSearchParameters
+                );
+
+            var totalContacts = await contactRepository.GetCountAsync(null, textSearchParameters);
+            var results = mapper.Map<IEnumerable<ContactOverviewResponseModel>>(contacts);
+
+            return new PagedResponse<ContactOverviewResponseModel>
+            {
+                Results = results,
+                Pagination = new PaginationDataResponse
+                {
+                    Page = pagingParameters.CurrentPage,
+                    PageSize = pagingParameters.ItemsPerPage,
+                    PageCount = (int)Math.Ceiling((decimal)totalContacts / pagingParameters.ItemsPerPage),
+                    ResultCount = totalContacts
+                }
+            };
         }
 
         public async Task<ContactDetailResponseModel> GetContactAsync(long id)
@@ -130,6 +165,15 @@ namespace AddressBook.Business.Services
                     existingPhoneNumber.Number = updatedPhoneNumbers[i].Number;
                 }
             }
+        }
+
+        private TextSearchParameters PrepareTextSearchParameters(ContactSearchRequestModel request)
+        {
+            return new TextSearchParameters
+            {
+                SearchFields = new List<string> { nameof(Contact.Name) },
+                SearchText = request.Name
+            };
         }
     }
 }

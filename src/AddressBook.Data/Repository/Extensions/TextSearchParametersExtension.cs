@@ -17,13 +17,11 @@ namespace AddressBook.Data.Repository.Extensions
                 throw new ArgumentException("Search fields cannot be null or empty", nameof(textSearchParameters.SearchFields));
             }
 
-            var responseExpression =
-                string.Format("{0}.Contains(\"{1}\")", textSearchParameters.SearchFields[0], textSearchParameters.SearchText);
+            var responseExpression = string.Format("{0}.Contains(\"{1}\")", textSearchParameters.SearchFields[0], textSearchParameters.SearchText);
 
             for (var i = 1; i < textSearchParameters.SearchFields.Count; i++)
             {
-                responseExpression +=
-                string.Format("or {0}.Contains(\"{1}\")", textSearchParameters.SearchFields[i], textSearchParameters.SearchText);
+                responseExpression += string.Format("or {0}.Contains(\"{1}\")", textSearchParameters.SearchFields[i], textSearchParameters.SearchText);
             }
 
             return responseExpression;

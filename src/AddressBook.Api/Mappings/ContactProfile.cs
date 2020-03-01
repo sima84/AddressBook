@@ -14,6 +14,7 @@ namespace AddressBook.Api.Mappings
             CreateMap<BusinessResponses.ContactDetailResponseModel, ContactDetailResponseModel>();
             CreateMap<CreateContactRequestModel, BusinessRequests.CreateContactRequestModel>();
             CreateMap<UpdateContactRequestModel, BusinessRequests.UpdateContactRequestModel>();
+            CreateMap<ContactSearchRequestModel, BusinessRequests.ContactSearchRequestModel>();
         }
     }
 }
