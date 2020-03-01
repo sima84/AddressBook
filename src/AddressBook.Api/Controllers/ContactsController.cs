@@ -22,6 +22,11 @@ namespace AddressBook.Api.Controllers
             this.mapper = mapper;
         }
 
+        /// <summary>
+        /// Gets list of contacts with their basic information.
+        /// </summary>
+        /// <param name="request">Contains search, paging and sorting parameters.</param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<PagedResponse<ContactOverviewResponseModel>>> GetContacts([FromQuery]ContactSearchRequestModel request)
         {
@@ -30,6 +35,11 @@ namespace AddressBook.Api.Controllers
             return Ok(mapper.Map<PagedResponse<ContactOverviewResponseModel>>(businessResponse));
         }
 
+        /// <summary>
+        /// Gets the contact details.
+        /// </summary>
+        /// <param name="id">Contact identifier.</param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<ContactDetailResponseModel>> GetContactDetails(long id)
         {
@@ -37,6 +47,11 @@ namespace AddressBook.Api.Controllers
             return Ok(mapper.Map<ContactDetailResponseModel>(contact));
         }
 
+        /// <summary>
+        /// Creates the contact.
+        /// </summary>
+        /// <param name="createRequest">The create request.</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<ContactDetailResponseModel>> CreateContact([FromBody] CreateContactRequestModel createRequest)
         {
@@ -45,6 +60,12 @@ namespace AddressBook.Api.Controllers
             return CreatedAtAction(nameof(GetContactDetails), new { id = businessResponse.Id }, mapper.Map<ContactDetailResponseModel>(businessResponse));
         }
 
+        /// <summary>
+        /// Updates the contact.
+        /// </summary>
+        /// <param name="id">Contact identifier.</param>
+        /// <param name="updateRequest">The update request.</param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<ActionResult<ContactDetailResponseModel>> UpdateContact([FromRoute]long id, [FromBody] UpdateContactRequestModel updateRequest)
         {
@@ -53,6 +74,11 @@ namespace AddressBook.Api.Controllers
             return Ok(mapper.Map<ContactDetailResponseModel>(businessResponse));
         }
 
+        /// <summary>
+        /// Deletes the contact.
+        /// </summary>
+        /// <param name="id">Contact identifier.</param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteContact(long id)
         {
