@@ -12,8 +12,4 @@
     <ProjectReference Include="..\AddressBook.Data\AddressBook.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\Contact\Request\" />
-  </ItemGroup>
-
 </Project>

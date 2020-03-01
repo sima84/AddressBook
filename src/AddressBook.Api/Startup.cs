@@ -1,5 +1,8 @@
 using AddressBook.Api.Configurations;
+using AddressBook.Business.Services;
+using AddressBook.Business.Services.Interfaces;
 using AddressBook.Data;
+using AddressBook.Data.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -29,6 +32,9 @@ namespace AddressBook.Api
             services.AddSwagger();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddTransient<IContactService, ContactService>();
+   
             services.AddControllers();
         }
 

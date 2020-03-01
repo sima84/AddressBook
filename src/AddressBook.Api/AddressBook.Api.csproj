@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />
@@ -17,10 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AddressBook.Business\AddressBook.Business.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\Contact\Request\" />
   </ItemGroup>
 
 
