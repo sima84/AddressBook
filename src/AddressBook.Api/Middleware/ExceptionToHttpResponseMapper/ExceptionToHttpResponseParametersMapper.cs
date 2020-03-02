@@ -1,19 +1,16 @@
 ﻿using AddressBook.Api.Infrastructure;
 using AddressBook.Business.Exceptions;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AddressBook.Api.Middleware.ExceptionToHttpResponseMapper
 {
     public class ExceptionToHttpResponseParametersMapper : IExceptionToHttpResponseParametersMapper
     {
+        public const string DefaultErrorMessage = "Internal error occured!";
+
         public bool TryGetHttpStatusCodeForException(Exception exception, out HttpResponseParameters parameters)
         {
             if (exception is ArgumentOutOfRangeException)
@@ -43,8 +40,13 @@ namespace AddressBook.Api.Middleware.ExceptionToHttpResponseMapper
             }
             else
             {
-                parameters = null;
-                return false;
+                parameters = new HttpResponseParameters
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    ContentType = HttpResponseContentTypes.TextPlain,
+                    Content = DefaultErrorMessage
+                };
+                return true;
             }
         }
 

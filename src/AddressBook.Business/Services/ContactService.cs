@@ -1,4 +1,5 @@
-﻿using AddressBook.Business.Models.Common.Response;
+﻿using AddressBook.Business.Exceptions;
+using AddressBook.Business.Models.Common.Response;
 using AddressBook.Business.Models.Contact.Request;
 using AddressBook.Business.Models.Contact.Response;
 using AddressBook.Business.Models.PhoneNumber.Request;
@@ -75,6 +76,17 @@ namespace AddressBook.Business.Services
 
         public async Task<ContactDetailResponseModel> CreateContactAsync(CreateContactRequestModel requestModel)
         {
+            var existingContact = await contactRepository.GetFirstAsync(x => x.Name == requestModel.Name && x.Address == requestModel.Address);
+
+            if (existingContact != null)
+            {
+                var errorMessage = "Contact with given name and address already exist";
+                var exception = new BusinessException(errorMessage);
+                exception.AddError(nameof(CreateContactRequestModel.Name), errorMessage);
+                exception.AddError(nameof(CreateContactRequestModel.Address), errorMessage);
+                throw exception;
+            }
+
             var contact = mapper.Map<Contact>(requestModel);
 
             await contactRepository.AddAsync(contact);
@@ -87,6 +99,20 @@ namespace AddressBook.Business.Services
         {
             var contact = await GetContactWithPhoneNumbers(id);
             contact = mapper.Map(requestModel, contact);
+
+            var existingContact = await contactRepository.GetFirstAsync(
+                x => x.Name == requestModel.Name && 
+                     x.Address == requestModel.Address &&
+                     x.Id != id);
+
+            if (existingContact != null)
+            {
+                var errorMessage = "Contact with given name and address already exist";
+                var exception = new BusinessException(errorMessage);
+                exception.AddError(nameof(UpdateContactRequestModel.Name), errorMessage);
+                exception.AddError(nameof(UpdateContactRequestModel.Address), errorMessage);
+                throw exception;
+            }
 
             await UpdatePhoneNumbers(contact, requestModel);
 
@@ -160,7 +186,11 @@ namespace AddressBook.Business.Services
                     var existingPhoneNumber = contact.PhoneNumbers.FirstOrDefault(x => x.Id == updatedPhoneNumbers[i].Id);
 
                     if (existingPhoneNumber == null)
-                        throw new ArgumentOutOfRangeException($"Phone number with id {updatedPhoneNumbers[i].Id} does not exist for contact {contact.Id}");
+                    {
+                        var errorMessage = "Corresponding phone number not found!";
+                        var propertyPath = nameof(UpdateContactRequestModel.PhoneNumbers) + "[" + i + "]." + nameof(UpdatePhoneNumberRequestModel.Id);                       
+                        throw new BusinessException(errorMessage, propertyPath);
+                    }
 
                     existingPhoneNumber.Number = updatedPhoneNumbers[i].Number;
                 }
@@ -174,6 +204,20 @@ namespace AddressBook.Business.Services
                 SearchFields = new List<string> { nameof(Contact.Name) },
                 SearchText = request.Name
             };
+        }
+
+        private async Task CheckExistingNameAndAddress(string name, string address)
+        {
+            var contact = await contactRepository.GetFirstAsync(x => x.Name == name && x.Address == address);
+
+            if (contact != null)
+            {
+                var errorMessage = "Contact with given name and address already exist";
+                var exception = new BusinessException(errorMessage);
+                exception.AddError(nameof(CreateContactRequestModel.Name), errorMessage);
+                exception.AddError(nameof(CreateContactRequestModel.Address), errorMessage);
+                throw exception;
+            }               
         }
     }
 }
